@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NEM Generator Behaviour & Market Response Intelligence System</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0b1524;
+      --canvas: #0f1a2a;
+      --panel: rgba(15, 26, 42, 0.72);
+      --panel-strong: rgba(17, 29, 48, 0.88);
+      --panel-soft: rgba(255, 255, 255, 0.055);
+      --ink: #f8fbff;
+      --ink-strong: #ffffff;
+      --muted: #9fb0c6;
+      --muted-2: #718198;
+      --line: rgba(148, 163, 184, 0.22);
+      --nav: #030813;
+      --teal: #2dd4bf;
+      --teal-soft: rgba(45, 212, 191, 0.18);
+      --blue: #60a5fa;
+      --blue-soft: rgba(96, 165, 250, 0.18);
+      --amber: #fbbf24;
+      --amber-soft: rgba(251, 191, 36, 0.18);
+      --red: #fb7185;
+      --red-soft: rgba(251, 113, 133, 0.18);
+      --purple: #a78bfa;
+      --purple-soft: rgba(167, 139, 250, 0.18);
+      --green: #4ade80;
+      --green-soft: rgba(74, 222, 128, 0.18);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --shadow-hot: 0 0 0 1px rgba(251, 191, 36, 0.38), 0 22px 60px rgba(251, 191, 36, 0.11);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --mono: "JetBrains Mono", "SF Mono", "Cascadia Mono", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(45, 212, 191, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 8%, rgba(96, 165, 250, 0.14), transparent 34%),
+        linear-gradient(180deg, #060b14 0%, var(--bg) 42%, #09111e 100%);
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 78%);
+      z-index: -1;
+    }
+
+    ::selection {
+      color: #021018;
+      background: var(--teal);
+    }
+
+    header {
+      background:
+        linear-gradient(120deg, rgba(45, 212, 191, 0.18), rgba(96, 165, 250, 0.14)),
+        var(--nav);
+      color: white;
+      padding: 38px 34px 26px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.8), rgba(96, 165, 250, 0.68), transparent);
+    }
+
+    .hero {
+      max-width: 1500px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 30px;
+      align-items: end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: #c9fff7;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(45, 212, 191, 0.09);
+      box-shadow: inset 0 0 20px rgba(45, 212, 191, 0.08);
+    }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      max-width: 1080px;
+      color: var(--ink-strong);
+      text-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+    }
+
+    .hero p {
+      color: #cbd7e8;
+      font-size: 17px;
+      max-width: 990px;
+      margin: 0;
+    }
+
+    .author-line {
+      margin-top: 18px;
+      color: #e5f0ff;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .author-line span {
+      color: #b8fff4;
+      font-weight: 700;
+      font-family: var(--mono);
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.055));
+      border: 1px solid rgba(45, 212, 191, 0.28);
+      border-radius: 8px;
+      padding: 18px;
+      min-width: 0;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-card h2 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    .hero-card ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: #d7e4f4;
+      font-size: 14px;
+    }
+
+    .tabbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(4, 10, 19, 0.84);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    .tabs {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(45, 212, 191, 0.44) rgba(255, 255, 255, 0.04);
+    }
+
+    .tabs::-webkit-scrollbar,
+    iframe::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      height: 9px;
+      width: 10px;
+    }
+
+    .tabs::-webkit-scrollbar-track,
+    iframe::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tabs::-webkit-scrollbar-thumb,
+    iframe::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.72), rgba(96, 165, 250, 0.72));
+      border-radius: 999px;
+    }
+
+    .tab-button {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 26, 42, 0.72);
+      color: #b7c5d8;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+      transition: transform 360ms var(--ease), color 360ms var(--ease), border-color 360ms var(--ease), background 360ms var(--ease), box-shadow 360ms var(--ease);
+    }
+
+    .tab-button:hover {
+      transform: translateY(-2px);
+      color: var(--ink);
+      border-color: rgba(45, 212, 191, 0.42);
+      background: rgba(23, 39, 62, 0.92);
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.24), rgba(96, 165, 250, 0.18));
+      color: white;
+      border-color: rgba(45, 212, 191, 0.58);
+      box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.18), 0 16px 36px rgba(45, 212, 191, 0.12);
+    }
+
+    main {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+      position: relative;
+      min-height: 820px;
+    }
+
+    .tab-panel {
+      display: block;
+      position: absolute;
+      inset: 24px 24px auto;
+      opacity: 0;
+      transform: translateX(28px);
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 420ms var(--ease), transform 520ms var(--ease), visibility 0ms linear 520ms;
+    }
+
+    .tab-panel.active {
+      display: block;
+      position: relative;
+      inset: auto;
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      visibility: visible;
+      transition: opacity 420ms var(--ease), transform 520ms var(--ease), visibility 0ms;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 4px 0 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 0;
+      color: var(--ink-strong);
+    }
+
+    .section-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .kpi,
+    .panel,
+    .chart-card,
+    .story-card,
+    .output-card {
+      background: linear-gradient(180deg, rgba(17, 29, 48, 0.82), rgba(11, 21, 36, 0.70));
+      border: 1px solid rgba(148, 163, 184, 0.20);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      transition: transform 380ms var(--ease), border-color 380ms var(--ease), box-shadow 380ms var(--ease), background 380ms var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before,
+    .panel::before,
+    .chart-card::before,
+    .story-card::before,
+    .output-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .kpi:hover,
+    .panel:hover,
+    .chart-card:hover,
+    .story-card:hover,
+    .output-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(45, 212, 191, 0.36);
+      box-shadow: 0 28px 85px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(45, 212, 191, 0.10);
+      background: linear-gradient(180deg, rgba(22, 37, 60, 0.88), rgba(12, 24, 40, 0.78));
+    }
+
+    .kpi.state-risk {
+      border-color: rgba(251, 191, 36, 0.42);
+      box-shadow: var(--shadow-hot);
+    }
+
+    .kpi.state-watch {
+      border-color: rgba(96, 165, 250, 0.34);
+    }
+
+    .kpi.state-response {
+      border-color: rgba(45, 212, 191, 0.36);
+    }
+
+    .kpi {
+      padding: 16px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .kpi .value {
+      margin-top: 8px;
+      font-size: 28px;
+      font-weight: 850;
+      color: var(--ink-strong);
+      font-family: var(--mono);
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi.state-risk .value,
+    .pulse-alert {
+      color: var(--amber);
+      animation: alertPulse 2.6s ease-in-out infinite;
+      text-shadow: 0 0 18px rgba(251, 191, 36, 0.26);
+    }
+
+    .kpi .note {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .chart-card {
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      color: var(--ink-strong);
+    }
+
+    .chart-card p,
+    .panel p,
+    .story-card p,
+    .output-card p {
+      color: var(--muted);
+      margin: 0 0 12px;
+      font-size: 14px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 620px;
+      border: 1px solid rgba(96, 165, 250, 0.24);
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 50px rgba(0, 0, 0, 0.24);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(45, 212, 191, 0.50) rgba(2, 8, 18, 0.20);
+    }
+
+    .panel,
+    .story-card,
+    .output-card {
+      padding: 18px;
+    }
+
+    .panel h3,
+    .story-card h3,
+    .output-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: var(--ink-strong);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 850;
+      background: rgba(96, 165, 250, 0.12);
+      color: #cfe7ff;
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .accent-teal { color: var(--teal); }
+    .accent-blue { color: var(--blue); }
+    .accent-amber { color: var(--amber); }
+    .accent-red { color: var(--red); }
+    .accent-purple { color: var(--purple); }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+      background: rgba(3, 8, 19, 0.54);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(96, 165, 250, 0.10);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #c8d7ea;
+      font-family: var(--mono);
+    }
+
+    td {
+      color: #d8e2ee;
+    }
+
+    td:first-child {
+      color: var(--ink-strong);
+      font-family: var(--mono);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tr {
+      transition: background 260ms var(--ease);
+    }
+
+    tbody tr:hover {
+      background: rgba(45, 212, 191, 0.07);
+    }
+
+    .data-grid td:first-child::before {
+      content: "▸";
+      display: inline-block;
+      margin-right: 8px;
+      color: var(--teal);
+    }
+
+    .trend-up::after,
+    .trend-down::after,
+    .trend-warn::after {
+      display: inline-flex;
+      margin-left: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .trend-up::after {
+      content: "↗";
+      color: var(--green);
+    }
+
+    .trend-down::after {
+      content: "↘";
+      color: var(--red);
+    }
+
+    .trend-warn::after {
+      content: "!";
+      width: 16px;
+      height: 16px;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      color: #211400;
+      background: var(--amber);
+    }
+
+    footer {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 20px 24px 42px;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: var(--mono);
+    }
+
+    @keyframes alertPulse {
+      0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 0 rgba(251, 191, 36, 0));
+      }
+      50% {
+        opacity: 0.78;
+        filter: drop-shadow(0 0 14px rgba(251, 191, 36, 0.32));
+      }
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+
+      header {
+        padding: 28px 20px 22px;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      iframe {
+        height: 540px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Australian NEM Portfolio Project 03</div>
+        <h1>NEM Generator Behaviour & Market Response Intelligence System</h1>
+        <p>
+          A Python, PostgreSQL, and Plotly market intelligence project that explains how generator output,
+          ramping, supply adequacy, and event drivers influence prices, volatility, and market risk in NSW1 and VIC1.
+        </p>
+        <div class="author-line">Built by <span>Vivek Arya</span> | Energy Market Analytics Portfolio</div>
+      </div>
+      <aside class="hero-card">
+        <h2>Project Scope</h2>
+        <ul>
+          <li>Date range: 2026-02-01 to 2026-03-01</li>
+          <li>Regions: NSW1 and VIC1</li>
+          <li>Core data: DISPATCHPRICE, DISPATCHREGIONSUM, DISPATCH_UNIT_SCADA</li>
+          <li>Focus: generator response, ramping, supply adequacy, event classification</li>
+        </ul>
+      </aside>
+    </section>
+  </header>
+
+  <nav class="tabbar">
+    <div class="tabs">
+      <button class="tab-button active" data-tab="overview">Market Overview</button>
+      <button class="tab-button" data-tab="supply">Supply Adequacy</button>
+      <button class="tab-button" data-tab="ramping">Generator Ramping</button>
+      <button class="tab-button" data-tab="events">Event Classification</button>
+      <button class="tab-button" data-tab="decision">Decision Intelligence</button>
+      <button class="tab-button" data-tab="methodology">Methodology</button>
+    </div>
+  </nav>
+
+  <main>
+    <section id="overview" class="tab-panel active">
+      <div class="section-title">
+        <div>
+          <h2>Market Overview</h2>
+          <p>High-level operating context for price, demand, available generation, and event behaviour across NSW1 and VIC1.</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi state-watch">
+          <div class="label">Study Period</div>
+          <div class="value">Feb 2026</div>
+          <div class="note">5-minute dispatch interval analysis</div>
+        </div>
+        <div class="kpi state-watch">
+          <div class="label">Regions</div>
+          <div class="value">2</div>
+          <div class="note">NSW1 and VIC1</div>
+        </div>
+        <div class="kpi state-response">
+          <div class="label">DUIDs</div>
+          <div class="value">503</div>
+          <div class="note">Observed in SCADA dataset</div>
+        </div>
+        <div class="kpi state-risk">
+          <div class="label">Event Logic</div>
+          <div class="value">6</div>
+          <div class="note">Supply, ramping, volatility, oversupply, renewable proxy, mixed driver</div>
+        </div>
+        <div class="kpi state-response">
+          <div class="label">Decision Layer</div>
+          <div class="value">5</div>
+          <div class="note">Situation, insight, recommendation, risk, confidence</div>
+        </div>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>RRP By Event Classification</h3>
+        <p>Shows how regional prices align with classified supply-side event drivers.</p>
+        <iframe src="outputs/charts/09_rrp_by_event_classification.html" title="RRP by event classification"></iframe>
+      </div>
+    </section>
+
+    <section id="supply" class="tab-panel">
+      <div class="section-title">
+        <div>
+          <h2>Supply Adequacy</h2>
+          <p>Supply margin analysis compares available generation with total demand to identify scarcity and oversupply risk.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-card">
+          <h3>Available Generation Versus Demand</h3>
+          <p>Core adequacy view showing whether available generation provided a comfortable buffer above demand.</p>
+          <iframe src="outputs/charts/09_available_generation_vs_demand.html" title="Available generation versus demand"></iframe>
+        </div>
+        <div class="chart-card">
+          <h3>Supply Margin By Event Class</h3>
+          <p>Connects supply buffer conditions to classified market events and price outcomes.</p>
+          <iframe src="outputs/charts/09_supply_margin_by_event_class.html" title="Supply margin by event class"></iframe>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h3>Analyst Interpretation</h3>
+        <p>
+          Supply margin is calculated as available generation minus total demand. Lower supply margin indicates tighter
+          operating conditions and greater sensitivity to outages, renewable reductions, interconnector changes, or ramp limits.
+        </p>
+        <div class="pill-row">
+          <span class="pill">Supply margin</span>
+          <span class="pill">Scarcity risk</span>
+          <span class="pill">Available generation</span>
+          <span class="pill">Demand balance</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="ramping" class="tab-panel">
+      <div class="section-title">
+        <div>
+          <h2>Generator Ramping</h2>
+          <p>DUID-level ramping analysis identifies units with material output movement and potential flexibility value.</p>
+        </div>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>Top Generator Ramping Units</h3>
+        <p>Ranks DUIDs by 95th percentile absolute dispatch interval ramping movement.</p>
+        <iframe src="outputs/charts/09_top_generator_ramping_units.html" title="Top generator ramping units"></iframe>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <h3>Output Change</h3>
+          <p>Measures how much each DUID changed output from one 5-minute interval to the next.</p>
+        </div>
+        <div class="panel">
+          <h3>Ramp Rate Proxy</h3>
+          <p>Normalises 5-minute output change into an approximate MW/hour ramping signal.</p>
+        </div>
+        <div class="panel">
+          <h3>Rapid Ramping Flag</h3>
+          <p>Identifies intervals where a DUID moved above its own 95th percentile output change.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="events" class="tab-panel">
+      <div class="section-title">
+        <div>
+          <h2>Event Classification</h2>
+          <p>Rule-based event logic converts market and generator features into explainable event driver categories.</p>
+        </div>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>Event Classification Counts By Region</h3>
+        <p>Compares the frequency of normal dispatch, supply tightness, ramping, volatility, oversupply, renewable proxy, and mixed driver events.</p>
+        <iframe src="outputs/charts/09_event_classification_counts.html" title="Event classification counts"></iframe>
+      </div>
+
+      <div class="panel">
+        <h3>Event Classes</h3>
+        <table class="data-grid">
+          <thead>
+            <tr>
+              <th>Event Class</th>
+              <th>Analyst Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="trend-warn">Supply Tightness Event</td><td>Supply margin is tight relative to demand, increasing scarcity pricing risk.</td></tr>
+            <tr><td class="trend-up">Generator Ramping Event</td><td>Aggregate generator movement is elevated, indicating material supply-side response.</td></tr>
+            <tr><td class="trend-warn">High Volatility Event</td><td>Regional price volatility is elevated, indicating unstable market conditions.</td></tr>
+            <tr><td class="trend-down">Oversupply Event</td><td>Negative prices and healthy supply margin suggest surplus generation pressure.</td></tr>
+            <tr><td class="trend-down">Renewable Dominance Event</td><td>Negative price with elevated aggregate output, used as a renewable dominance proxy.</td></tr>
+            <tr><td class="trend-warn">Mixed Driver Event</td><td>Multiple market signals are active, so a single-driver explanation may be misleading.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="decision" class="tab-panel">
+      <div class="section-title">
+        <div>
+          <h2>Decision Intelligence</h2>
+          <p>Classified events are translated into market situation, insight, recommendation, risk, confidence, and priority.</p>
+        </div>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>Decision Priority By Event Class</h3>
+        <p>Links event classification to analyst action and risk prioritisation.</p>
+        <iframe src="outputs/charts/09_decision_priority_by_event_class.html" title="Decision priority by event class"></iframe>
+      </div>
+
+      <div class="grid-2">
+        <div class="story-card">
+          <h3>Example: Supply Tightness</h3>
+          <p><strong>Situation:</strong> supply margin tightening.</p>
+          <p><strong>Insight:</strong> available generation buffer is low relative to demand.</p>
+          <p><strong>Recommendation:</strong> monitor scarcity pricing risk and review availability assumptions.</p>
+        </div>
+        <div class="story-card">
+          <h3>Example: Mixed Driver</h3>
+          <p><strong>Situation:</strong> multiple market stress signals active.</p>
+          <p><strong>Insight:</strong> a single-factor explanation may be misleading.</p>
+          <p><strong>Recommendation:</strong> review supply margin, ramping, volatility, and price signals together.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="methodology" class="tab-panel">
+      <div class="section-title">
+        <div>
+          <h2>Methodology</h2>
+          <p>The project is built as a transparent analyst workflow from raw dispatch data to decision intelligence.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="output-card">
+          <h3>Workflow</h3>
+          <table class="data-grid">
+            <thead>
+              <tr><th>Step</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="trend-up">01 Data Extraction</td><td>Extract and clean price, region summary, and SCADA data from PostgreSQL.</td></tr>
+              <tr><td class="trend-up">02 Feature Engineering</td><td>Create supply margin, volatility, generator ramping, and utilisation proxy features.</td></tr>
+              <tr><td class="trend-up">03-06 Analysis</td><td>Analyse generation mix, ramping, supply adequacy, and generator event response.</td></tr>
+              <tr><td class="trend-warn">07 Classification</td><td>Classify intervals into transparent event driver categories.</td></tr>
+              <tr><td class="trend-warn">08 Decision Intelligence</td><td>Generate recommendations, risks, and confidence levels.</td></tr>
+              <tr><td class="trend-up">09 Visualisation</td><td>Create interactive Plotly dashboard charts.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="output-card">
+          <h3>Limitations And Extensions</h3>
+          <p>
+            This version analyses physical generator behaviour from SCADA and regional market data. It does not yet include bid data,
+            fuel type mapping, storage classification, or network constraint context.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Next: BIDPEROFFER_D</span>
+            <span class="pill">Next: DUID fuel mapping</span>
+            <span class="pill">Next: storage classification</span>
+            <span class="pill">Next: constraints context</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    NEM Generator Behaviour & Market Response Intelligence System. Built with Python, pandas, PostgreSQL, Plotly, and GitHub Pages.
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll(".tab-button");
+    const panels = document.querySelectorAll(".tab-panel");
+    let activePanel = document.querySelector(".tab-panel.active");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+        const nextPanel = document.getElementById(target);
+
+        if (nextPanel === activePanel) {
+          return;
+        }
+
+        buttons.forEach((item) => item.classList.remove("active"));
+        panels.forEach((panel) => {
+          panel.classList.remove("active");
+          panel.classList.remove("exiting");
+        });
+
+        if (activePanel) {
+          activePanel.classList.add("exiting");
+        }
+
+        button.classList.add("active");
+        nextPanel.classList.add("active");
+        activePanel = nextPanel;
+      });
+    });
+  </script>
+</body>
+</html>
