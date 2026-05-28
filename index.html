@@ -408,6 +408,54 @@
       min-width: 0;
     }
 
+    .chart-grid {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+
+    .chart-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+
+    .chart-top > div {
+      min-width: 0;
+    }
+
+    .full-view {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      border: 1px solid rgba(45, 212, 191, 0.34);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #d9fff9;
+      background: rgba(45, 212, 191, 0.10);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+      transition: transform 320ms var(--ease), border-color 320ms var(--ease), background 320ms var(--ease), box-shadow 320ms var(--ease);
+      white-space: nowrap;
+    }
+
+    .full-view::after {
+      content: "↗";
+      margin-left: 8px;
+      color: var(--teal);
+    }
+
+    .full-view:hover {
+      transform: translateY(-2px);
+      border-color: rgba(45, 212, 191, 0.70);
+      background: rgba(45, 212, 191, 0.18);
+      box-shadow: 0 14px 34px rgba(45, 212, 191, 0.14);
+    }
+
     .chart-card h3 {
       margin: 0 0 4px;
       font-size: 18px;
@@ -425,7 +473,8 @@
 
     iframe {
       width: 100%;
-      height: 620px;
+      height: min(76vh, 820px);
+      min-height: 680px;
       border: 1px solid rgba(96, 165, 250, 0.24);
       border-radius: 6px;
       background: #ffffff;
@@ -677,8 +726,13 @@
       </div>
 
       <div class="chart-card wide">
-        <h3>RRP By Event Classification</h3>
-        <p>Shows how regional prices align with classified supply-side event drivers.</p>
+        <div class="chart-top">
+          <div>
+            <h3>RRP By Event Classification</h3>
+            <p>Shows how regional prices align with classified supply-side event drivers.</p>
+          </div>
+          <a class="full-view" href="outputs/charts/09_rrp_by_event_classification.html" target="_blank" rel="noopener">Open full view</a>
+        </div>
         <iframe src="outputs/charts/09_rrp_by_event_classification.html" title="RRP by event classification"></iframe>
       </div>
     </section>
@@ -691,15 +745,25 @@
         </div>
       </div>
 
-      <div class="grid-2">
+      <div class="grid-2 chart-grid">
         <div class="chart-card">
-          <h3>Available Generation Versus Demand</h3>
-          <p>Core adequacy view showing whether available generation provided a comfortable buffer above demand.</p>
+          <div class="chart-top">
+            <div>
+              <h3>Available Generation Versus Demand</h3>
+              <p>Core adequacy view showing whether available generation provided a comfortable buffer above demand.</p>
+            </div>
+            <a class="full-view" href="outputs/charts/09_available_generation_vs_demand.html" target="_blank" rel="noopener">Open full view</a>
+          </div>
           <iframe src="outputs/charts/09_available_generation_vs_demand.html" title="Available generation versus demand"></iframe>
         </div>
         <div class="chart-card">
-          <h3>Supply Margin By Event Class</h3>
-          <p>Connects supply buffer conditions to classified market events and price outcomes.</p>
+          <div class="chart-top">
+            <div>
+              <h3>Supply Margin By Event Class</h3>
+              <p>Connects supply buffer conditions to classified market events and price outcomes.</p>
+            </div>
+            <a class="full-view" href="outputs/charts/09_supply_margin_by_event_class.html" target="_blank" rel="noopener">Open full view</a>
+          </div>
           <iframe src="outputs/charts/09_supply_margin_by_event_class.html" title="Supply margin by event class"></iframe>
         </div>
       </div>
@@ -728,8 +792,13 @@
       </div>
 
       <div class="chart-card wide">
-        <h3>Top Generator Ramping Units</h3>
-        <p>Ranks DUIDs by 95th percentile absolute dispatch interval ramping movement.</p>
+        <div class="chart-top">
+          <div>
+            <h3>Top Generator Ramping Units</h3>
+            <p>Ranks DUIDs by 95th percentile absolute dispatch interval ramping movement.</p>
+          </div>
+          <a class="full-view" href="outputs/charts/09_top_generator_ramping_units.html" target="_blank" rel="noopener">Open full view</a>
+        </div>
         <iframe src="outputs/charts/09_top_generator_ramping_units.html" title="Top generator ramping units"></iframe>
       </div>
 
@@ -758,8 +827,13 @@
       </div>
 
       <div class="chart-card wide">
-        <h3>Event Classification Counts By Region</h3>
-        <p>Compares the frequency of normal dispatch, supply tightness, ramping, volatility, oversupply, renewable proxy, and mixed driver events.</p>
+        <div class="chart-top">
+          <div>
+            <h3>Event Classification Counts By Region</h3>
+            <p>Compares the frequency of normal dispatch, supply tightness, ramping, volatility, oversupply, renewable proxy, and mixed driver events.</p>
+          </div>
+          <a class="full-view" href="outputs/charts/09_event_classification_counts.html" target="_blank" rel="noopener">Open full view</a>
+        </div>
         <iframe src="outputs/charts/09_event_classification_counts.html" title="Event classification counts"></iframe>
       </div>
 
@@ -793,8 +867,13 @@
       </div>
 
       <div class="chart-card wide">
-        <h3>Decision Priority By Event Class</h3>
-        <p>Links event classification to analyst action and risk prioritisation.</p>
+        <div class="chart-top">
+          <div>
+            <h3>Decision Priority By Event Class</h3>
+            <p>Links event classification to analyst action and risk prioritisation.</p>
+          </div>
+          <a class="full-view" href="outputs/charts/09_decision_priority_by_event_class.html" target="_blank" rel="noopener">Open full view</a>
+        </div>
         <iframe src="outputs/charts/09_decision_priority_by_event_class.html" title="Decision priority by event class"></iframe>
       </div>
 
